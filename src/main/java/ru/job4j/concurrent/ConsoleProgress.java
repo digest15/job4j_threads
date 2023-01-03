@@ -16,9 +16,11 @@ public class ConsoleProgress implements Runnable {
     @Override
     public void run() {
         byte i = 0;
+        int length = process.length;
         while (!Thread.currentThread().isInterrupted()) {
             System.out.printf("\rLoading...%c", process[i]);
-            if (++i == 4) {
+            i++;
+            if (i == length) {
                 i = 0;
             }
             try {
