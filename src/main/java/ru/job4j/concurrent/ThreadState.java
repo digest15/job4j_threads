@@ -7,12 +7,11 @@ public class ThreadState {
         var second = new Thread(printThreadName);
         first.start();
         second.start();
-        while (true) {
-            if (Thread.State.TERMINATED.equals(first.getState())
-                    && Thread.State.TERMINATED.equals(second.getState())) {
-                System.out.println("All threads finish his work");
-                break;
-            }
+        var isDone = true;
+        while (isDone) {
+            isDone = !(Thread.State.TERMINATED.equals(first.getState())
+                    && Thread.State.TERMINATED.equals(second.getState()));
         }
+        System.out.println("All threads finish his work");
     }
 }
