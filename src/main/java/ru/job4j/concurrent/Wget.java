@@ -64,8 +64,8 @@ public class Wget implements Runnable {
     }
 
     private void controlSpeed(long loadTime) throws InterruptedException {
-        if (loadTime < BytePerSecond.millis) {
-            Thread.sleep(BytePerSecond.millis - loadTime);
+        if (loadTime < BytePerSecond.MILLIS) {
+            Thread.sleep(BytePerSecond.MILLIS - loadTime);
         }
     }
 
@@ -112,7 +112,7 @@ public class Wget implements Runnable {
 
         final int forByte;
 
-        static final int millis = 1000;
+        static final int MILLIS = 1000;
 
         BytePerSecond(int forByte) {
             this.forByte = forByte;
