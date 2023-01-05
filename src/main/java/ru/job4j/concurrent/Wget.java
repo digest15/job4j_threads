@@ -45,7 +45,8 @@ public class Wget implements Runnable {
             long start = System.currentTimeMillis();
 
             while (!Thread.currentThread().isInterrupted() && (bytesRead) != -1) {
-                if ((downloadData += bytesRead) >= speed) {
+                downloadData += bytesRead;
+                if (downloadData >= speed) {
                     long end = System.currentTimeMillis();
                     controlSpeed(end - start);
                     downloadData = 0;
