@@ -4,8 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.util.Arrays;
 
 public class Wget implements Runnable {
     private final String url;
@@ -22,7 +20,7 @@ public class Wget implements Runnable {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        validate(args);
+        WgetValidator.validate(args);
         var url = args[0];
         var multiplier = Integer.parseInt(args[1]);
         BytePerSecond bytePerSecond = BytePerSecond.valueOf(args[2].toUpperCase());
@@ -70,42 +68,9 @@ public class Wget implements Runnable {
         }
     }
 
-    private static void validate(String[] args) {
-        if (args.length < 4) {
-            throw new IllegalArgumentException("Must be three parameter: Url, multiplier, speed type, file");
-        }
 
-        String url = args[0];
-        try {
-            new URL(url);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Wrong Url: " + url);
-        }
 
-        String multiplier = args[1];
-        try {
-            Integer.parseInt(multiplier);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Wrong speed: " + multiplier);
-        }
-
-        String speedType = args[2];
-        try {
-            BytePerSecond.valueOf(speedType.toUpperCase());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Wrong speed type: " + speedType
-                    + ". You must specify " + Arrays.toString(BytePerSecond.values()));
-        }
-
-        String file = args[3];
-        try {
-            Path.of(file).toFile();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Wrong file name: " + file);
-        }
-    }
-
-    private enum BytePerSecond {
+    protected enum BytePerSecond {
         BYTE(1),
         KBYTE(1024),
         MBYTE(1048576),
