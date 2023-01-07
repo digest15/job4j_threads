@@ -1,4 +1,4 @@
-package ru.job4j.concurrent;
+package ru.job4j.concurrent.wget;
 
 import java.net.URL;
 import java.nio.file.Path;
