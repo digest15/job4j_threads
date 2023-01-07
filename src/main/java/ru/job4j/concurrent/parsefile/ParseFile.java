@@ -1,44 +1,36 @@
 package ru.job4j.concurrent.parsefile;
 
 import java.io.*;
+import java.util.function.Predicate;
 
 public class ParseFile {
-    private File file;
+    private final File file;
 
-    public synchronized void setFile(File f) {
-        file = f;
-    }
-
-    public synchronized File getFile() {
-        return file;
+    public ParseFile(File file) {
+        this.file = file;
     }
 
     public String getContent() throws IOException {
-        InputStream i = new FileInputStream(file);
-        String output = "";
-        int data;
-        while ((data = i.read()) > 0) {
-            output += (char) data;
-        }
-        return output;
+        return content(data -> true);
     }
 
     public String getContentWithoutUnicode() throws IOException {
-        InputStream i = new FileInputStream(file);
-        String output = "";
-        int data;
-        while ((data = i.read()) > 0) {
-            if (data < 0x80) {
-                output += (char) data;
-            }
-        }
-        return output;
+        return content(data -> data < 0x80);
     }
 
-    public void saveContent(String content) throws IOException {
-        OutputStream o = new FileOutputStream(file);
-        for (int i = 0; i < content.length(); i += 1) {
-            o.write(content.charAt(i));
+    private String content(Predicate<Character> filter) throws IOException {
+        StringBuilder output = new StringBuilder();
+        try (InputStream i = new BufferedInputStream(new FileInputStream(file))) {
+            int data = 0;
+            while (data >= 0) {
+                data = i.read();
+                if (data < 0x80) {
+                    if (filter.test((char) data)) {
+                        output.append((char) data);
+                    }
+                }
+            }
         }
+        return output.toString();
     }
 }
