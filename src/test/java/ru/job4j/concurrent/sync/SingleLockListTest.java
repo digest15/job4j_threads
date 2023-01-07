@@ -11,12 +11,12 @@ import static org.assertj.core.api.Assertions.*;
 class SingleLockListTest {
     @Test
     public void whenIt(){
-        var init = new ArrayList<>();
+        var init = new ArrayList<Integer>();
         SingleLockList<Integer> list = new SingleLockList<>(init);
         list.add(1);
         var it = list.iterator();
         list.add(2);
-        assertThat(1, is(it.next()));
+        assertThat(1).isEqualTo(it.next());
     }
 
     @Test
@@ -31,6 +31,6 @@ class SingleLockListTest {
         second.join();
         Set<Integer> rsl = new TreeSet<>();
         list.iterator().forEachRemaining(rsl::add);
-        assertThat(rsl, is(Set.of(1, 2)));
+        assertThat(rsl).isEqualTo(Set.of(1, 2));
     }
 }
