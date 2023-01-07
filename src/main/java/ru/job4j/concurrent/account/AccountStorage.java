@@ -1,28 +1,58 @@
 package ru.job4j.concurrent.account;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 import java.util.HashMap;
 import java.util.Optional;
 
+@ThreadSafe
 public class AccountStorage {
+    @GuardedBy("accounts")
     private final HashMap<Integer, Account> accounts = new HashMap<>();
 
     public boolean add(Account account) {
-        return false;
+        if (account == null) {
+            throw new IllegalArgumentException("Account mustn't be null");
+        }
+        synchronized (accounts) {
+            accounts.put(account.id(), account);
+            return true;
+        }
     }
 
     public boolean update(Account account) {
-        return false;
+        synchronized (accounts) {
+            return accounts.replace(account.id(), account) != null;
+        }
     }
 
     public boolean delete(int id) {
-        return false;
+        synchronized (accounts) {
+            return accounts.remove(id) != null;
+        }
     }
 
     public Optional<Account> getById(int id) {
-        return Optional.empty();
+        synchronized (accounts) {
+            return Optional.ofNullable(accounts.get(id));
+        }
     }
 
     public boolean transfer(int fromId, int toId, int amount) {
-        return false;
+        synchronized (accounts) {
+            var isOk = false;
+            Optional<Account> from = getById(fromId)
+                    .filter(a -> a.amount() >= amount);
+            if (from.isPresent()) {
+                Optional<Account> to = getById(toId);
+                if (to.isPresent()) {
+                    accounts.put(fromId, new Account(fromId, from.get().amount() - amount));
+                    accounts.put(toId, new Account(toId, to.get().amount() + amount));
+                    isOk = true;
+                }
+            }
+            return isOk;
+        }
     }
 }
