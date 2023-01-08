@@ -24,10 +24,8 @@ public class ParseFile {
             int data = 0;
             while (data >= 0) {
                 data = i.read();
-                if (data < 0x80) {
-                    if (filter.test((char) data)) {
-                        output.append((char) data);
-                    }
+                if (filter.test((char) data)) {
+                    output.append((char) data);
                 }
             }
         }
