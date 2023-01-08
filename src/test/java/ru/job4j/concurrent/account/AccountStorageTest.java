@@ -15,6 +15,13 @@ class AccountStorageTest {
     }
 
     @Test
+    void whenAddNull() {
+        var storage = new AccountStorage();
+        assertThatThrownBy(() -> storage.add(null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void whenUpdate() {
         var storage = new AccountStorage();
         storage.add(new Account(1, 100));
