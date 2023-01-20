@@ -1,22 +1,21 @@
 package ru.job4j.concurrent;
 
 public class ParallelSearch {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<Integer>();
         final Thread consumer = new Thread(
                 () -> {
-                    while (true) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         try {
                             System.out.println(queue.poll());
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
                             Thread.currentThread().interrupt();
                         }
                     }
                 }
         );
         consumer.start();
-        new Thread(
+        Thread produser = new Thread(
                 () -> {
                     for (int index = 0; index != 3; index++) {
                         queue.offer(index);
@@ -28,6 +27,8 @@ public class ParallelSearch {
                     }
                 }
 
-        ).start();
+        );
+        produser.join();
+        consumer.interrupt();
     }
 }
