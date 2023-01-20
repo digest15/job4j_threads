@@ -9,10 +9,19 @@ public class SimpleBlockingQueue<T> {
     @GuardedBy("this")
     private Queue<T> queue = new LinkedList<>();
 
-    public void offer(T value) {
+    public synchronized void offer(T value) {
+        queue.offer(value);
+        notifyAll();
     }
 
-    public T poll() {
-        return null;
+    public synchronized T poll() {
+        while (queue.peek() == null) {
+            try {
+               wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        return queue.poll();
     }
 }
