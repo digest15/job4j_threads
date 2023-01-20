@@ -11,7 +11,12 @@ class SimpleBlockingQueueTest {
     public void whenPollThenOffer() throws Exception {
         SimpleBlockingQueue<Integer> simpleBlockingQueue = new SimpleBlockingQueue<>();
         Runnable consumer = () -> {
-            System.out.println(Thread.currentThread().getName() + ", value: " + simpleBlockingQueue.poll());
+            try {
+                System.out.println(Thread.currentThread().getName() + ", value: " + simpleBlockingQueue.poll());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
         };
         Thread consumer1 = new Thread(consumer, "Consumer1");
         consumer1.start();
