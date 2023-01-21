@@ -6,18 +6,30 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class SimpleBlockingQueue<T> {
+
+    private final int size;
+
+    public SimpleBlockingQueue(int size) {
+        this.size = size;
+    }
+
     @GuardedBy("this")
     private Queue<T> queue = new LinkedList<>();
 
-    public synchronized void offer(T value) {
+    public synchronized void offer(T value)  throws InterruptedException {
+        while (queue.size() == size) {
+            wait();
+        }
         queue.offer(value);
         notifyAll();
     }
 
     public synchronized T poll() throws InterruptedException {
-        while (queue.peek() == null) {
+        while (queue.size() == 0) {
             wait();
         }
-        return queue.poll();
+        var result = queue.poll();
+        notifyAll();
+        return result;
     }
 }
