@@ -2,20 +2,23 @@ package ru.job4j.concurrent;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.*;
 
 class SimpleBlockingQueueTest {
     @Test
     public void whenPollWithEmptyQueueThenOffer() throws Exception {
-        SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(2);
+        final CopyOnWriteArrayList<Integer> buffer = new CopyOnWriteArrayList<>();
+        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(2);
         Runnable consumer = () -> {
             try {
-                System.out.println(Thread.currentThread().getName() + ", value: " + queue.poll());
+                buffer.add(queue.poll());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         };
         Thread consumer1 = new Thread(consumer, "Consumer1");
@@ -23,15 +26,13 @@ class SimpleBlockingQueueTest {
         Thread consumer2 = new Thread(consumer, "Consumer2");
         consumer2.start();
 
-        TimeUnit.SECONDS.sleep(5);
-
         Thread produser1 = new Thread(() -> {
-            System.out.println(Thread.currentThread().getName());
             try {
                 queue.offer(1);
                 queue.offer(2);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         },
                 "Produser1");
@@ -40,19 +41,22 @@ class SimpleBlockingQueueTest {
         produser1.join();
         consumer1.join();
         consumer2.join();
+
+        assertThat(buffer).isEqualTo(List.of(1, 2));
     }
 
     @Test
     public void whenOfferWithFullyQueueThenPoll() throws InterruptedException {
         int size = 3;
-        SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(size);
+        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(size);
+        final CopyOnWriteArrayList<Integer> buffer = new CopyOnWriteArrayList<>();
         Thread produser1 = new Thread(() -> {
             for (int i = 0; i < size + 1; i++) {
                 try {
                     queue.offer(i);
-                    System.out.println(Thread.currentThread().getName() + " Offer " + i);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             }
         },
@@ -60,19 +64,21 @@ class SimpleBlockingQueueTest {
 
         Thread consumer1 = new Thread(() -> {
             try {
-                for (int i = 0; i < size; i++) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(Thread.currentThread().getName() + " Poll " + queue.poll());
+                while (!queue.isEmpty() || !Thread.currentThread().isInterrupted()) {
+                    buffer.add(queue.poll());
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         },
                 "Consumer1");
 
         produser1.start();
         consumer1.start();
-        consumer1.join();
         produser1.join();
+        consumer1.interrupt();
+        consumer1.join();
+
+        assertThat(buffer).isEqualTo(List.of(0, 1, 2, 3));
     }
 }
