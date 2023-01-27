@@ -19,49 +19,41 @@ public class ParallelIndexSearcher<T> {
 
     public int indexOf(T value) {
         isFound = false;
-        return pool.invoke(new SearchTask(array, value));
+        return pool.invoke(new SearchTask(0, array.length, value));
     }
 
     private class SearchTask extends RecursiveTask<Integer> {
         private static final int THRESHOLD = 10;
 
-        private final T[] array;
+        private final int from;
+        private final int to;
         private final T value;
 
-        public SearchTask(T[] array, T value) {
-            this.array = array;
+        public SearchTask(int from, int to, T value) {
+            this.from = from;
+            this.to = to;
             this.value = value;
         }
 
         @Override
         protected Integer compute() {
-            if (array.length <= THRESHOLD) {
+            if (to - from <= THRESHOLD) {
                 return lineSearch();
             }
-            T[] leftArr = Arrays.copyOfRange(array, 0, array.length / 2);
-            SearchTask leftTask = new SearchTask(leftArr, value);
+            int border = (to - from) / 2 + from;
+            SearchTask leftTask = new SearchTask(from, border,  value);
+            SearchTask rightTask = new SearchTask(border, to, value);
             leftTask.fork();
-            int li = leftTask.join();
-
-            T[] rightArr = Arrays.copyOfRange(array, array.length / 2, array.length);
-            SearchTask rightTask = new SearchTask(rightArr, value);
             rightTask.fork();
+            int li = leftTask.join();
             int ri = rightTask.join();
 
-            int result;
-            if (li == -1 && ri == -1) {
-                result = -1;
-            } else if (li == -1) {
-                result = ri + leftArr.length;
-            } else {
-                result = li;
-            }
-            return result;
+            return Math.max(li, ri);
         }
 
         private Integer lineSearch() {
             int result = -1;
-            for (int i = 0; i < array.length && !isFound; i++) {
+            for (int i = from; i < to && !isFound; i++) {
                 if (value.equals(array[i])) {
                     result = i;
                     isFound = true;
