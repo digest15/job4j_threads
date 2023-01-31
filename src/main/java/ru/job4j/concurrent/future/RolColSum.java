@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class RolColSum {
-    public record Sums(int rowSum, int colSum){}
+    public record Sums(int rowSum, int colSum) { }
 
     public static Sums[] sum(int[][] matrix) {
         Sums[] sums = new Sums[matrix.length];
