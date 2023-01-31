@@ -1,4 +1,4 @@
-package ru.job4j.concurrent;
+package ru.job4j.concurrent.future;
 
 import java.util.HashMap;
 import java.util.Map;
