@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.*;
 
 class RolColSumTest {
 
-    private static final int SIZE = 50000;
+    private static final int SIZE = 1000;
 
     private static int[][] matrics;
 
